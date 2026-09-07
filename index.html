@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tactical Strike 3D</title>
+<title>3D Tactical FPS</title>
 
 <style>
 * {
@@ -15,68 +15,77 @@ body {
     overflow: hidden;
     background: #000;
     font-family: Arial, sans-serif;
-    user-select: none;
 }
 
-#game {
-    width: 100vw;
-    height: 100vh;
+canvas {
+    display: block;
 }
 
 #menu {
     position: fixed;
     inset: 0;
     z-index: 100;
+    background: linear-gradient(135deg, #10151c, #030405);
+    color: white;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    background:
-        linear-gradient(#0009, #0009),
-        radial-gradient(circle at center, #283747, #080a0c 70%);
-    color: white;
 }
 
-.menu-box {
-    width: 450px;
+.menu {
+    width: 420px;
     padding: 40px;
-    background: #101418ee;
-    border: 1px solid #65717d;
-    box-shadow: 0 20px 80px #000;
     text-align: center;
+
+    background: rgba(15,18,22,.95);
+    border: 1px solid #555;
+    box-shadow: 0 0 60px #000;
 }
 
-.menu-box h1 {
+.menu h1 {
+    font-size: 46px;
     margin: 0;
-    font-size: 50px;
-    letter-spacing: 5px;
+    color: #d99b28;
 }
 
-.menu-box p {
-    color: #aab4bd;
+.menu h2 {
+    color: #999;
+    font-weight: normal;
 }
 
-.menu-box button {
+.menu button {
     width: 100%;
     padding: 16px;
     margin-top: 20px;
+
     border: 0;
-    background: #d69b22;
-    color: #111;
+    background: #d99b28;
+
     font-size: 20px;
     font-weight: bold;
+
     cursor: pointer;
 }
 
-.menu-box button:hover {
-    background: #f1b52f;
+.menu button:hover {
+    background: #f0b536;
+}
+
+.controls {
+    color: #aaa;
+    line-height: 1.8;
+    margin-top: 25px;
 }
 
 #hud {
+    display: none;
+
     position: fixed;
     inset: 0;
-    z-index: 20;
+    z-index: 10;
+
     pointer-events: none;
-    display: none;
     color: white;
 }
 
@@ -84,171 +93,144 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
+
     transform: translate(-50%, -50%);
+
     font-size: 28px;
     font-weight: bold;
+
+    text-shadow: 0 0 5px black;
 }
 
 #stats {
     position: absolute;
-    left: 25px;
-    bottom: 25px;
+    bottom: 20px;
+    left: 20px;
+
     padding: 15px 20px;
-    background: #0009;
-    border-left: 4px solid #d69b22;
-    font-size: 19px;
+
+    background: rgba(0,0,0,.7);
+
+    font-size: 20px;
     line-height: 1.7;
 }
 
-#ammoBox {
-    position: absolute;
-    right: 30px;
-    bottom: 25px;
-    text-align: right;
-    background: #0009;
-    padding: 15px 20px;
-}
-
 #ammo {
-    font-size: 38px;
+    position: absolute;
+    right: 25px;
+    bottom: 20px;
+
+    padding: 15px 20px;
+
+    background: rgba(0,0,0,.7);
+
+    font-size: 30px;
     font-weight: bold;
 }
 
 #weapon {
     position: absolute;
+
     left: 50%;
-    bottom: -5px;
+    bottom: 5px;
+
     transform: translateX(-50%);
-    font-size: 100px;
-    filter: drop-shadow(0 10px 10px #000);
+
+    font-size: 90px;
+
+    filter: drop-shadow(0 5px 10px black);
 }
 
-#killFeed {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    text-align: right;
-}
+#error {
+    display: none;
 
-.kill {
-    background: #0009;
-    margin-bottom: 5px;
-    padding: 7px 12px;
-}
-
-#damage {
-    position: absolute;
-    inset: 0;
-    background: #f00;
-    opacity: 0;
-}
-
-#dead {
     position: fixed;
     inset: 0;
-    z-index: 90;
-    display: none;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    background: #000b;
+    z-index: 999;
+
+    background: #170000;
     color: white;
-}
 
-#dead h1 {
-    font-size: 70px;
-    color: #d22;
-}
+    padding: 40px;
 
-#dead button {
-    padding: 15px 50px;
-    font-size: 20px;
-    cursor: pointer;
+    font-family: monospace;
+    white-space: pre-wrap;
 }
 </style>
 </head>
 
 <body>
 
-<div id="game"></div>
+<div id="error"></div>
 
 <div id="menu">
-    <div class="menu-box">
-        <h1>TACTICAL STRIKE</h1>
-        <p>3D TACTICAL FPS</p>
 
-        <button onclick="startGame()">
+    <div class="menu">
+
+        <h1>TACTICAL FPS</h1>
+
+        <h2>3D BROWSER GAME</h2>
+
+        <button id="startButton">
             НАЧАТЬ ИГРУ
         </button>
 
-        <p>
+        <div class="controls">
+
             WASD — движение<br>
             SHIFT — бег<br>
             Мышь — обзор<br>
-            ЛКМ — стрельба<br>
+            ЛКМ — стрелять<br>
             R — перезарядка<br>
             ESC — освободить мышь
-        </p>
+
+        </div>
+
     </div>
+
 </div>
+
 
 <div id="hud">
 
     <div id="crosshair">+</div>
 
     <div id="stats">
+
         ❤️ <span id="health">100</span><br>
-        ☠ Убийства: <span id="kills">0</span><br>
-        🤖 Ботов на карте: <span id="botCount">0</span>
+
+        ☠ Убийства:
+        <span id="kills">0</span><br>
+
+        🤖 Ботов:
+        <span id="bots">0</span>
+
     </div>
 
-    <div id="ammoBox">
-        <div id="ammo">30 / 90</div>
-        <div>R — перезарядка</div>
+    <div id="ammo">
+        30 / 90
     </div>
 
-    <div id="weapon">🔫</div>
+    <div id="weapon">
+        🔫
+    </div>
 
-    <div id="killFeed"></div>
-
-    <div id="damage"></div>
-</div>
-
-<div id="dead">
-    <h1>ВЫ ПОГИБЛИ</h1>
-    <p id="deathStats"></p>
-    <button onclick="location.reload()">
-        ИГРАТЬ СНОВА
-    </button>
 </div>
 
 
 <script type="module">
 
+/*
+    THREE.JS
+*/
+
 import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+"https://unpkg.com/three@0.160.0/build/three.module.js";
 
 
-// ======================================================
-// НАСТРОЙКИ
-// ======================================================
-
-const WORLD_SIZE = 70;
-
-const PLAYER_RADIUS = 0.45;
-
-const BOT_RADIUS = 0.45;
-
-const BOT_MAX = 12;
-
-const BULLET_DAMAGE = 50;
-
-const MAGAZINE = 30;
-
-
-// ======================================================
-// THREE.JS
-// ======================================================
+/* =====================================================
+   ПЕРЕМЕННЫЕ
+===================================================== */
 
 let scene;
 let camera;
@@ -257,162 +239,179 @@ let renderer;
 let clock;
 
 let walls = [];
-let bots = [];
-
-let gameStarted = false;
-let gameOver = false;
+let enemies = [];
 
 let keys = {};
 
 let health = 100;
-
 let kills = 0;
 
-let ammo = MAGAZINE;
-let reserveAmmo = 90;
+let ammo = 30;
+let reserve = 90;
 
-let shooting = false;
-let reloading = false;
+let started = false;
+let dead = false;
 
 let yaw = 0;
 let pitch = 0;
 
 
-// ======================================================
-// КАРТА
-// ======================================================
+/* =====================================================
+   ЗАПУСК
+===================================================== */
 
-const map = [
-
-    // внешние стены
-
-    {x:0,z:-34,w:68,d:2},
-    {x:0,z:34,w:68,d:2},
-    {x:-34,z:0,w:2,d:68},
-    {x:34,z:0,w:2,d:68},
-
-    // внутренние стены
-
-    {x:-14,z:-20,w:2,d:20},
-    {x:14,z:-20,w:2,d:20},
-
-    {x:-14,z:20,w:2,d:20},
-    {x:14,z:20,w:2,d:20},
-
-    {x:-25,z:0,w:18,d:2},
-    {x:25,z:0,w:18,d:2},
-
-    {x:0,z:-10,w:18,d:2},
-    {x:0,z:10,w:18,d:2},
-
-    {x:-5,z:-24,w:2,d:10},
-    {x:5,z:24,w:2,d:10}
-];
+document
+    .getElementById("startButton")
+    .addEventListener("click", startGame);
 
 
-// ======================================================
-// START
-// ======================================================
+function startGame() {
 
-window.startGame = function() {
+    document
+        .getElementById("menu")
+        .style.display = "none";
 
-    document.getElementById("menu").style.display = "none";
+    document
+        .getElementById("hud")
+        .style.display = "block";
 
-    document.getElementById("hud").style.display = "block";
-
-    gameStarted = true;
+    started = true;
 
     init();
 
     document.body.requestPointerLock();
-};
-
-
-// ======================================================
-// INIT
-// ======================================================
-
-function init() {
-
-    scene = new THREE.Scene();
-
-    scene.background =
-        new THREE.Color(0x101418);
-
-    scene.fog =
-        new THREE.Fog(
-            0x101418,
-            10,
-            65
-        );
-
-
-    camera =
-        new THREE.PerspectiveCamera(
-            75,
-            innerWidth / innerHeight,
-            0.05,
-            200
-        );
-
-
-    camera.position.set(
-        0,
-        1.7,
-        27
-    );
-
-
-    renderer =
-        new THREE.WebGLRenderer({
-            antialias:true
-        });
-
-    renderer.setSize(
-        innerWidth,
-        innerHeight
-    );
-
-    renderer.shadowMap.enabled = true;
-
-    renderer.shadowMap.type =
-        THREE.PCFSoftShadowMap;
-
-
-    document
-        .getElementById("game")
-        .appendChild(renderer.domElement);
-
-
-    clock = new THREE.Clock();
-
-
-    createLights();
-
-    createFloor();
-
-    createMap();
-
-    spawnInitialBots();
-
-
-    addEvents();
-
-    animate();
 }
 
 
-// ======================================================
-// СВЕТ
-// ======================================================
+/* =====================================================
+   ИНИЦИАЛИЗАЦИЯ
+===================================================== */
+
+function init() {
+
+    try {
+
+        scene =
+            new THREE.Scene();
+
+
+        scene.background =
+            new THREE.Color(0x15191d);
+
+
+        scene.fog =
+            new THREE.Fog(
+                0x15191d,
+                10,
+                70
+            );
+
+
+        /* КАМЕРА */
+
+        camera =
+            new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth /
+                window.innerHeight,
+                0.1,
+                200
+            );
+
+
+        camera.position.set(
+            0,
+            1.7,
+            25
+        );
+
+
+        /* РЕНДЕР */
+
+        renderer =
+            new THREE.WebGLRenderer({
+                antialias: true
+            });
+
+
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
+
+
+        renderer.setPixelRatio(
+            Math.min(
+                window.devicePixelRatio,
+                2
+            )
+        );
+
+
+        renderer.shadowMap.enabled = true;
+
+
+        document
+            .body
+            .appendChild(renderer.domElement);
+
+
+        /* ВРЕМЯ */
+
+        clock =
+            new THREE.Clock();
+
+
+        createLights();
+
+        createFloor();
+
+        createWalls();
+
+        createEnemies();
+
+        createEvents();
+
+        updateHUD();
+
+        animate();
+
+    }
+
+    catch(error) {
+
+        showError(error);
+    }
+}
+
+
+/* =====================================================
+   ОШИБКА
+===================================================== */
+
+function showError(error) {
+
+    const box =
+        document.getElementById("error");
+
+    box.style.display = "block";
+
+    box.textContent =
+        "ОШИБКА ИГРЫ:\n\n" +
+        error.stack;
+}
+
+
+/* =====================================================
+   СВЕТ
+===================================================== */
 
 function createLights() {
 
     const ambient =
-        new THREE.HemisphereLight(
-            0x8899aa,
-            0x222222,
-            1.4
+        new THREE.AmbientLight(
+            0xffffff,
+            1.5
         );
 
     scene.add(ambient);
@@ -421,25 +420,21 @@ function createLights() {
     const light =
         new THREE.DirectionalLight(
             0xffffff,
-            1.2
+            2
         );
 
     light.position.set(
         10,
-        30,
+        20,
         10
     );
 
     light.castShadow = true;
 
-    light.shadow.mapSize.width = 2048;
-
-    light.shadow.mapSize.height = 2048;
-
     scene.add(light);
 
 
-    // лампы
+    /* Красные лампы */
 
     for (
         let x = -25;
@@ -447,48 +442,43 @@ function createLights() {
         x += 12
     ) {
 
-        for (
-            let z = -25;
-            z <= 25;
-            z += 12
-        ) {
-
-            const l =
-                new THREE.PointLight(
-                    0xffc477,
-                    5,
-                    14
-                );
-
-            l.position.set(
-                x,
-                4.5,
-                z
+        const red =
+            new THREE.PointLight(
+                0xff4400,
+                4,
+                18
             );
 
-            scene.add(l);
-        }
+        red.position.set(
+            x,
+            4,
+            0
+        );
+
+        scene.add(red);
     }
 }
 
 
-// ======================================================
-// ПОЛ
-// ======================================================
+/* =====================================================
+   ПОЛ
+===================================================== */
 
 function createFloor() {
 
     const geometry =
         new THREE.PlaneGeometry(
-            WORLD_SIZE,
-            WORLD_SIZE
+            70,
+            70
         );
+
 
     const material =
         new THREE.MeshStandardMaterial({
-            color:0x3b3d3f,
-            roughness:0.9
+            color: 0x404346,
+            roughness: 1
         });
+
 
     const floor =
         new THREE.Mesh(
@@ -496,112 +486,161 @@ function createFloor() {
             material
         );
 
+
     floor.rotation.x =
         -Math.PI / 2;
 
+
     floor.receiveShadow = true;
+
 
     scene.add(floor);
 
 
-    // сетка пола
+    /* Сетка */
 
     const grid =
         new THREE.GridHelper(
-            WORLD_SIZE,
+            70,
             35,
-            0x555555,
+            0x777777,
             0x333333
         );
 
-    grid.position.y = 0.01;
+
+    grid.position.y = .01;
+
 
     scene.add(grid);
 }
 
 
-// ======================================================
-// СТЕНЫ
-// ======================================================
+/* =====================================================
+   СТЕНА
+===================================================== */
 
-function createMap() {
+function wall(
+    x,
+    z,
+    width,
+    depth
+) {
 
-    for (const data of map) {
-
-        const geometry =
-            new THREE.BoxGeometry(
-                data.w,
-                4,
-                data.d
-            );
-
-        const material =
-            new THREE.MeshStandardMaterial({
-                color:0x596067,
-                roughness:0.8
-            });
-
-        const wall =
-            new THREE.Mesh(
-                geometry,
-                material
-            );
-
-        wall.position.set(
-            data.x,
-            2,
-            data.z
+    const geometry =
+        new THREE.BoxGeometry(
+            width,
+            5,
+            depth
         );
 
-        wall.castShadow = true;
 
-        wall.receiveShadow = true;
-
-        scene.add(wall);
-
-        walls.push({
-            mesh:wall,
-            x:data.x,
-            z:data.z,
-            w:data.w,
-            d:data.d
+    const material =
+        new THREE.MeshStandardMaterial({
+            color: 0x666666
         });
-    }
+
+
+    const object =
+        new THREE.Mesh(
+            geometry,
+            material
+        );
+
+
+    object.position.set(
+        x,
+        2.5,
+        z
+    );
+
+
+    object.castShadow = true;
+
+    object.receiveShadow = true;
+
+
+    scene.add(object);
+
+
+    walls.push({
+        x: x,
+        z: z,
+        width: width,
+        depth: depth
+    });
 }
 
 
-// ======================================================
-// БОТ
-// ======================================================
+/* =====================================================
+   КАРТА
+===================================================== */
 
-function createBot(x,z) {
+function createWalls() {
+
+    /* внешняя граница */
+
+    wall(0, -34, 68, 2);
+
+    wall(0, 34, 68, 2);
+
+    wall(-34, 0, 2, 68);
+
+    wall(34, 0, 2, 68);
+
+
+    /* внутренние */
+
+    wall(-15, -12, 2, 20);
+
+    wall(15, -12, 2, 20);
+
+    wall(-15, 15, 2, 18);
+
+    wall(15, 15, 2, 18);
+
+
+    wall(-25, 0, 18, 2);
+
+    wall(25, 0, 18, 2);
+
+
+    wall(0, -20, 18, 2);
+
+    wall(0, 20, 18, 2);
+}
+
+
+/* =====================================================
+   БОТ
+===================================================== */
+
+function createBot(x, z) {
 
     const bot =
         new THREE.Group();
 
 
-    // =========================
-    // НОГИ
-    // =========================
+    /* НОГИ */
 
-    const pantsMaterial =
+    const pants =
         new THREE.MeshStandardMaterial({
-            color:0x20252a
+            color: 0x20252b
         });
 
 
     const leg1 =
         new THREE.Mesh(
             new THREE.BoxGeometry(
-                .38,
+                .4,
                 1.1,
-                .42
+                .4
             ),
-            pantsMaterial
+            pants
         );
 
+
     leg1.position.set(
-        -.25,
+        -.23,
         .55,
         0
     );
@@ -610,74 +649,70 @@ function createBot(x,z) {
     const leg2 =
         leg1.clone();
 
+
     leg2.position.x =
-        .25;
+        .23;
 
 
     bot.add(leg1);
     bot.add(leg2);
 
 
-    // =========================
-    // ТЕЛО
-    // =========================
+    /* ТЕЛО */
 
-    const shirtMaterial =
+    const shirt =
         new THREE.MeshStandardMaterial({
             color:
                 Math.random() > .5
-                ? 0x283c50
-                : 0x4c3b2a
+                ? 0x33495b
+                : 0x5b4531
         });
 
 
     const body =
         new THREE.Mesh(
             new THREE.BoxGeometry(
-                1.05,
-                1.45,
+                1.1,
+                1.4,
                 .6
             ),
-            shirtMaterial
+            shirt
         );
 
-    body.position.y =
-        1.65;
 
-    body.castShadow = true;
+    body.position.y =
+        1.6;
+
 
     bot.add(body);
 
 
-    // =========================
-    // БРОНЕЖИЛЕТ
-    // =========================
+    /* БРОНЕЖИЛЕТ */
 
     const armor =
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 .9,
-                .9,
+                .85,
                 .65
             ),
             new THREE.MeshStandardMaterial({
-                color:0x30363c,
-                metalness:.3
+                color: 0x292d31
             })
         );
 
+
     armor.position.set(
         0,
-        1.7,
+        1.65,
         -.05
     );
+
 
     bot.add(armor);
 
 
-    // =========================
-    // ГОЛОВА
-    // =========================
+    /* ГОЛОВА */
 
     const head =
         new THREE.Mesh(
@@ -687,21 +722,19 @@ function createBot(x,z) {
                 12
             ),
             new THREE.MeshStandardMaterial({
-                color:0xc68662
+                color: 0xc78b68
             })
         );
+
 
     head.position.y =
         2.65;
 
-    head.castShadow = true;
 
     bot.add(head);
 
 
-    // =========================
-    // ВОЛОСЫ
-    // =========================
+    /* ВОЛОСЫ */
 
     const hair =
         new THREE.Mesh(
@@ -715,45 +748,47 @@ function createBot(x,z) {
                 Math.PI / 2
             ),
             new THREE.MeshStandardMaterial({
-                color:0x191919
+                color: 0x151515
             })
         );
 
+
     hair.position.y =
-        2.78;
+        2.8;
+
 
     bot.add(hair);
 
 
-    // =========================
-    // ГЛАЗА
-    // =========================
+    /* ГЛАЗА */
 
     const eyeMaterial =
         new THREE.MeshBasicMaterial({
-            color:0x222222
+            color: 0x222222
         });
 
 
     const eye1 =
         new THREE.Mesh(
             new THREE.SphereGeometry(
-                .045,
+                .05,
                 8,
                 8
             ),
             eyeMaterial
         );
 
+
     eye1.position.set(
         -.15,
-        2.66,
-        -.38
+        2.67,
+        -.39
     );
 
 
     const eye2 =
         eye1.clone();
+
 
     eye2.position.x =
         .15;
@@ -763,38 +798,11 @@ function createBot(x,z) {
     bot.add(eye2);
 
 
-    // =========================
-    // РОТ
-    // =========================
+    /* РУКИ */
 
-    const mouth =
-        new THREE.Mesh(
-            new THREE.BoxGeometry(
-                .2,
-                .04,
-                .03
-            ),
-            new THREE.MeshBasicMaterial({
-                color:0x321818
-            })
-        );
-
-    mouth.position.set(
-        0,
-        2.48,
-        -.39
-    );
-
-    bot.add(mouth);
-
-
-    // =========================
-    // РУКИ
-    // =========================
-
-    const armMaterial =
+    const skin =
         new THREE.MeshStandardMaterial({
-            color:0xc68662
+            color: 0xc78b68
         });
 
 
@@ -802,52 +810,47 @@ function createBot(x,z) {
         new THREE.Mesh(
             new THREE.BoxGeometry(
                 .28,
-                1.1,
+                1,
                 .28
             ),
-            armMaterial
+            skin
         );
 
-    arm1.position.set(
-        -.7,
-        1.65,
-        -.05
-    );
 
-    arm1.rotation.z =
-        -.15;
+    arm1.position.set(
+        -.68,
+        1.6,
+        0
+    );
 
 
     const arm2 =
         arm1.clone();
 
-    arm2.position.x =
-        .7;
 
-    arm2.rotation.z =
-        .15;
+    arm2.position.x =
+        .68;
 
 
     bot.add(arm1);
     bot.add(arm2);
 
 
-    // =========================
-    // ОРУЖИЕ
-    // =========================
+    /* ОРУЖИЕ */
 
     const gun =
         new THREE.Mesh(
             new THREE.BoxGeometry(
-                .25,
-                .25,
-                1.3
+                .22,
+                .22,
+                1.2
             ),
             new THREE.MeshStandardMaterial({
-                color:0x111111,
-                metalness:.7
+                color: 0x111111,
+                metalness: .8
             })
         );
+
 
     gun.position.set(
         0,
@@ -855,15 +858,15 @@ function createBot(x,z) {
         -.65
     );
 
+
     gun.rotation.x =
         Math.PI / 2;
+
 
     bot.add(gun);
 
 
-    // =========================
-    // ДАННЫЕ AI
-    // =========================
+    /* ДАННЫЕ */
 
     bot.position.set(
         x,
@@ -871,141 +874,91 @@ function createBot(x,z) {
         z
     );
 
+
     bot.userData.health = 100;
 
-    bot.userData.state = "patrol";
-
-    bot.userData.target =
-        new THREE.Vector3();
+    bot.userData.speed =
+        .025 +
+        Math.random() * .02;
 
     bot.userData.lastShot = 0;
 
-    bot.userData.speed =
-        .035 + Math.random() * .015;
-
-    bot.userData.path = [];
-
-    bot.userData.pathIndex = 0;
-
-    bot.userData.nextThink = 0;
+    bot.userData.target =
+        new THREE.Vector3(
+            x,
+            0,
+            z
+        );
 
 
     scene.add(bot);
 
-    bots.push(bot);
-
-    updateBotCount();
+    enemies.push(bot);
 }
 
 
-// ======================================================
-// ПОИСК СВОБОДНОГО МЕСТА
-// ======================================================
+/* =====================================================
+   СОЗДАНИЕ БОТОВ
+===================================================== */
 
-function randomFreePosition() {
+function createEnemies() {
 
-    for (let i = 0; i < 100; i++) {
+    const positions = [
 
-        const x =
-            -28 + Math.random() * 56;
+        [-10, -5],
+        [10, -5],
+        [-20, 15],
+        [20, 15],
+        [-10, 25],
+        [10, 25]
 
-        const z =
-            -28 + Math.random() * 56;
+    ];
 
-
-        if (
-            !collidesWithWall(
-                x,
-                z,
-                BOT_RADIUS
-            )
-        ) {
-
-            return {
-                x,
-                z
-            };
-        }
-    }
-
-    return {
-        x:0,
-        z:0
-    };
-}
-
-
-// ======================================================
-// БЕСКОНЕЧНЫЕ БОТЫ
-// ======================================================
-
-function spawnInitialBots() {
 
     for (
-        let i = 0;
-        i < 8;
-        i++
+        const position of positions
     ) {
 
-        const pos =
-            randomFreePosition();
-
         createBot(
-            pos.x,
-            pos.z
+            position[0],
+            position[1]
         );
     }
 }
 
 
-// ======================================================
-// SPAWN НОВОГО БОТА
-// ======================================================
+/* =====================================================
+   ПРОВЕРКА СТЕНЫ
+===================================================== */
 
-function spawnBot() {
-
-    if (gameOver) return;
-
-    const pos =
-        randomFreePosition();
-
-    createBot(
-        pos.x,
-        pos.z
-    );
-}
-
-
-// ======================================================
-// КОЛЛИЗИЯ СО СТЕНОЙ
-// ======================================================
-
-function collidesWithWall(
+function blocked(
     x,
     z,
     radius
 ) {
 
-    for (const wall of walls) {
+    for (
+        const w of walls
+    ) {
 
         const minX =
-            wall.x -
-            wall.w / 2 -
+            w.x -
+            w.width / 2 -
             radius;
 
         const maxX =
-            wall.x +
-            wall.w / 2 +
+            w.x +
+            w.width / 2 +
             radius;
 
         const minZ =
-            wall.z -
-            wall.d / 2 -
+            w.z -
+            w.depth / 2 -
             radius;
 
         const maxZ =
-            wall.z +
-            wall.d / 2 +
+            w.z +
+            w.depth / 2 +
             radius;
 
 
@@ -1020,162 +973,224 @@ function collidesWithWall(
         }
     }
 
+
     return false;
 }
 
 
-// ======================================================
-// ДВИЖЕНИЕ С КОЛЛИЗИЯМИ
-// ======================================================
+/* =====================================================
+   ДВИЖЕНИЕ С КОЛЛИЗИЯМИ
+===================================================== */
 
-function moveWithCollision(
+function moveObject(
     object,
     dx,
     dz,
     radius
 ) {
 
-    const nx =
+    const newX =
         object.position.x + dx;
 
-    const nz =
-        object.position.z + dz;
-
-
-    // X
 
     if (
-        !collidesWithWall(
-            nx,
+        !blocked(
+            newX,
             object.position.z,
             radius
         )
     ) {
 
-        object.position.x = nx;
+        object.position.x =
+            newX;
     }
 
 
-    // Z
+    const newZ =
+        object.position.z + dz;
+
 
     if (
-        !collidesWithWall(
+        !blocked(
             object.position.x,
-            nz,
+            newZ,
             radius
         )
     ) {
 
-        object.position.z = nz;
+        object.position.z =
+            newZ;
     }
 }
 
 
-// ======================================================
-// LINE OF SIGHT
-// ======================================================
+/* =====================================================
+   ИГРОК
+===================================================== */
 
-function canSeePlayer(bot) {
+function updatePlayer() {
 
-    const start =
-        bot.position.clone();
-
-    start.y = 1.7;
-
-
-    const end =
-        camera.position.clone();
+    const speed =
+        keys["ShiftLeft"] ||
+        keys["ShiftRight"]
+        ? .16
+        : .09;
 
 
-    const direction =
-        end.clone().sub(start);
-
-    const distance =
-        direction.length();
-
-    direction.normalize();
+    const forward =
+        new THREE.Vector3();
 
 
-    const ray =
-        new THREE.Raycaster(
-            start,
-            direction,
-            0,
-            distance
-        );
+    camera.getWorldDirection(
+        forward
+    );
 
 
-    const wallMeshes =
-        walls.map(w => w.mesh);
+    forward.y = 0;
+
+    forward.normalize();
 
 
-    const hits =
-        ray.intersectObjects(
-            wallMeshes,
-            false
-        );
+    const right =
+        new THREE.Vector3();
 
 
-    return hits.length === 0;
-}
+    right.crossVectors(
+        forward,
+        camera.up
+    );
 
 
-// ======================================================
-// AI БОТА
-// ======================================================
-
-function updateBot(bot, delta) {
-
-    if (gameOver) return;
+    right.normalize();
 
 
-    const distance =
-        bot.position.distanceTo(
-            camera.position
-        );
+    let dx = 0;
 
+    let dz = 0;
 
-    // =========================
-    // УВИДЕЛ ИГРОКА
-    // =========================
 
     if (
-        distance < 25 &&
-        canSeePlayer(bot)
+        keys["KeyW"]
     ) {
 
-        bot.userData.state =
-            "attack";
+        dx +=
+            forward.x *
+            speed;
+
+        dz +=
+            forward.z *
+            speed;
     }
 
 
-    // =========================
-    // АТАКА
-    // =========================
+    if (
+        keys["KeyS"]
+    ) {
+
+        dx -=
+            forward.x *
+            speed;
+
+        dz -=
+            forward.z *
+            speed;
+    }
+
 
     if (
-        bot.userData.state ===
-        "attack"
+        keys["KeyA"]
+    ) {
+
+        dx -=
+            right.x *
+            speed;
+
+        dz -=
+            right.z *
+            speed;
+    }
+
+
+    if (
+        keys["KeyD"]
+    ) {
+
+        dx +=
+            right.x *
+            speed;
+
+        dz +=
+            right.z *
+            speed;
+    }
+
+
+    moveObject(
+        camera,
+        dx,
+        dz,
+        .5
+    );
+
+
+    camera.position.y =
+        1.7;
+}
+
+
+/* =====================================================
+   AI БОТОВ
+===================================================== */
+
+function updateBots() {
+
+    for (
+        const bot of enemies
     ) {
 
         const target =
             camera.position.clone();
 
+
         target.y = 0;
 
 
         const direction =
-            target
+            target.clone()
                 .sub(bot.position);
 
-        const dist =
+
+        const distance =
             direction.length();
 
 
         direction.normalize();
 
 
-        // Повернуться к игроку
+        /*
+            Бот идёт к игроку,
+            но moveObject не даст ему
+            пройти через стену.
+        */
+
+        if (
+            distance > 4
+        ) {
+
+            moveObject(
+                bot,
+                direction.x *
+                bot.userData.speed,
+
+                direction.z *
+                bot.userData.speed,
+
+                .5
+            );
+        }
+
+
+        /* смотрит на игрока */
 
         bot.lookAt(
             camera.position.x,
@@ -1184,170 +1199,34 @@ function updateBot(bot, delta) {
         );
 
 
-        // Подойти
-
-        if (dist > 7) {
-
-            moveWithCollision(
-                bot,
-                direction.x *
-                bot.userData.speed,
-                direction.z *
-                bot.userData.speed,
-                BOT_RADIUS
-            );
-        }
-
-
-        // Стрельба
-
-        const now =
-            performance.now();
-
+        /* стреляет */
 
         if (
-            dist < 22 &&
-            canSeePlayer(bot) &&
-            now -
+            distance < 22 &&
+            performance.now() -
             bot.userData.lastShot >
-            900
+            1000
         ) {
 
             bot.userData.lastShot =
-                now;
+                performance.now();
+
 
             botShoot(bot);
         }
-
-
-        // Потерял игрока
-
-        if (
-            dist > 30 ||
-            !canSeePlayer(bot)
-        ) {
-
-            bot.userData.state =
-                "search";
-
-            bot.userData.target =
-                camera.position.clone();
-        }
-
-        return;
-    }
-
-
-    // =========================
-    // ПОИСК
-    // =========================
-
-    if (
-        bot.userData.state ===
-        "search"
-    ) {
-
-        const target =
-            bot.userData.target;
-
-        const direction =
-            target.clone()
-                .sub(bot.position);
-
-        direction.y = 0;
-
-        const distance =
-            direction.length();
-
-
-        if (distance > 1) {
-
-            direction.normalize();
-
-            moveWithCollision(
-                bot,
-                direction.x *
-                bot.userData.speed,
-                direction.z *
-                bot.userData.speed,
-                BOT_RADIUS
-            );
-
-        } else {
-
-            bot.userData.state =
-                "patrol";
-        }
-
-
-        return;
-    }
-
-
-    // =========================
-    // ПАТРУЛЬ
-    // =========================
-
-    if (
-        bot.userData.state ===
-        "patrol"
-    ) {
-
-        if (
-            !bot.userData.target ||
-            bot.position.distanceTo(
-                bot.userData.target
-            ) < 1
-        ) {
-
-            const pos =
-                randomFreePosition();
-
-            bot.userData.target =
-                new THREE.Vector3(
-                    pos.x,
-                    0,
-                    pos.z
-                );
-        }
-
-
-        const direction =
-            bot.userData.target
-                .clone()
-                .sub(bot.position);
-
-        direction.y = 0;
-
-        direction.normalize();
-
-
-        moveWithCollision(
-            bot,
-            direction.x *
-            bot.userData.speed *
-            .5,
-            direction.z *
-            bot.userData.speed *
-            .5,
-            BOT_RADIUS
-        );
-
-
-        bot.lookAt(
-            bot.userData.target.x,
-            bot.position.y,
-            bot.userData.target.z
-        );
     }
 }
 
 
-// ======================================================
-// СТРЕЛЬБА БОТА
-// ======================================================
+/* =====================================================
+   СТРЕЛЬБА БОТА
+===================================================== */
 
 function botShoot(bot) {
+
+    /*
+        Простая вероятность попадания.
+    */
 
     const distance =
         bot.position.distanceTo(
@@ -1355,10 +1234,7 @@ function botShoot(bot) {
         );
 
 
-    // Чем дальше бот,
-    // тем меньше вероятность попадания
-
-    let chance =
+    const chance =
         Math.max(
             .15,
             1 -
@@ -1371,70 +1247,46 @@ function botShoot(bot) {
         chance
     ) {
 
-        const damage =
-            5 +
-            Math.random() * 8;
+        health -=
+            8 +
+            Math.random() * 7;
 
-        damagePlayer(damage);
+
+        health =
+            Math.max(
+                0,
+                health
+            );
+
+
+        updateHUD();
+
+
+        if (
+            health <= 0
+        ) {
+
+            playerDeath();
+        }
     }
 }
 
 
-// ======================================================
-// УРОН ИГРОКУ
-// ======================================================
-
-function damagePlayer(amount) {
-
-    if (gameOver) return;
-
-    health -= amount;
-
-    health =
-        Math.max(
-            0,
-            health
-        );
-
-
-    const damage =
-        document.getElementById(
-            "damage"
-        );
-
-    damage.style.opacity = ".35";
-
-    setTimeout(() => {
-
-        damage.style.opacity = "0";
-
-    }, 100);
-
-
-    updateHUD();
-
-
-    if (health <= 0) {
-
-        playerDeath();
-    }
-}
-
-
-// ======================================================
-// СТРЕЛЬБА ИГРОКА
-// ======================================================
+/* =====================================================
+   СТРЕЛЬБА ИГРОКА
+===================================================== */
 
 function shoot() {
 
     if (
-        !gameStarted ||
-        gameOver ||
-        reloading
+        !started ||
+        dead
     ) return;
 
 
-    if (ammo <= 0) {
+    if (
+        ammo <= 0
+    ) {
 
         reload();
 
@@ -1444,22 +1296,18 @@ function shoot() {
 
     ammo--;
 
+
     updateHUD();
 
 
-    // отдача
-
-    pitch -= .015;
-
-
-    // луч
+    /* луч */
 
     const ray =
         new THREE.Raycaster();
 
 
     ray.setFromCamera(
-        new THREE.Vector2(0,0),
+        new THREE.Vector2(0, 0),
         camera
     );
 
@@ -1467,17 +1315,19 @@ function shoot() {
     const objects = [];
 
 
-    for (const bot of bots) {
+    for (
+        const bot of enemies
+    ) {
 
         bot.traverse(
-            child => {
+            object => {
 
                 if (
-                    child.isMesh
+                    object.isMesh
                 ) {
 
                     objects.push(
-                        child
+                        object
                     );
                 }
             }
@@ -1493,260 +1343,145 @@ function shoot() {
 
 
     if (
-        hits.length > 0
+        hits.length === 0
+    ) return;
+
+
+    let bot =
+        hits[0].object;
+
+
+    while (
+        bot &&
+        !enemies.includes(bot)
     ) {
 
-        let bot =
-            hits[0].object;
+        bot =
+            bot.parent;
+    }
 
 
-        while (
-            bot &&
-            !bots.includes(bot)
-        ) {
-
-            bot =
-                bot.parent;
-        }
+    if (!bot) return;
 
 
-        if (bot) {
-
-            bot.userData.health -=
-                BULLET_DAMAGE;
+    bot.userData.health -= 50;
 
 
-            // эффект попадания
+    if (
+        bot.userData.health <= 0
+    ) {
 
-            bot.position.y += .05;
-
-
-            if (
-                bot.userData.health <= 0
-            ) {
-
-                killBot(bot);
-            }
-        }
+        killBot(bot);
     }
 }
 
 
-// ======================================================
-// УБИЙСТВО БОТА
-// ======================================================
+/* =====================================================
+   УБИЙСТВО
+===================================================== */
 
 function killBot(bot) {
 
     scene.remove(bot);
 
-    bots =
-        bots.filter(
+
+    enemies =
+        enemies.filter(
             b => b !== bot
         );
 
 
     kills++;
 
+
     updateHUD();
 
-    addKillFeed();
 
+    /*
+        БЕСКОНЕЧНЫЕ БОТЫ
+    */
 
-    // Новый бот через время
-
-    setTimeout(() => {
-
-        if (
-            gameStarted &&
-            !gameOver
-        ) {
-
-            spawnBot();
-        }
-
-    }, 1200);
+    setTimeout(
+        spawnNewBot,
+        1000
+    );
 }
 
 
-// ======================================================
-// KILL FEED
-// ======================================================
+/* =====================================================
+   НОВЫЙ БОТ
+===================================================== */
 
-function addKillFeed() {
+function spawnNewBot() {
 
-    const feed =
-        document.getElementById(
-            "killFeed"
-        );
-
-
-    const item =
-        document.createElement(
-            "div"
-        );
-
-    item.className = "kill";
-
-    item.textContent =
-        "☠ YOU → BOT";
+    if (
+        dead
+    ) return;
 
 
-    feed.appendChild(item);
+    let x;
+    let z;
 
 
-    setTimeout(() => {
+    do {
 
-        item.remove();
+        x =
+            -28 +
+            Math.random() *
+            56;
 
-    }, 2500);
+        z =
+            -28 +
+            Math.random() *
+            56;
+
+    } while (
+        blocked(x,z,.6)
+    );
+
+
+    createBot(
+        x,
+        z
+    );
 }
 
 
-// ======================================================
-// ПЕРЕЗАРЯДКА
-// ======================================================
+/* =====================================================
+   ПЕРЕЗАРЯДКА
+===================================================== */
 
 function reload() {
 
     if (
-        reloading ||
-        ammo === MAGAZINE ||
-        reserveAmmo <= 0
+        ammo >= 30 ||
+        reserve <= 0
     ) return;
 
 
-    reloading = true;
+    const needed =
+        30 - ammo;
 
 
-    setTimeout(() => {
-
-        const needed =
-            MAGAZINE - ammo;
-
-        const loaded =
-            Math.min(
-                needed,
-                reserveAmmo
-            );
+    const amount =
+        Math.min(
+            needed,
+            reserve
+        );
 
 
-        ammo += loaded;
+    ammo += amount;
 
-        reserveAmmo -= loaded;
+    reserve -= amount;
 
-        reloading = false;
 
-        updateHUD();
-
-    }, 1400);
+    updateHUD();
 }
 
 
-// ======================================================
-// ИГРОК
-// ======================================================
-
-function updatePlayer(delta) {
-
-    const speed =
-        keys["ShiftLeft"] ||
-        keys["ShiftRight"]
-        ? .16
-        : .09;
-
-
-    const forward =
-        new THREE.Vector3();
-
-    camera.getWorldDirection(
-        forward
-    );
-
-    forward.y = 0;
-
-    forward.normalize();
-
-
-    const right =
-        new THREE.Vector3();
-
-    right.crossVectors(
-        forward,
-        camera.up
-    );
-
-    right.normalize();
-
-
-    let dx = 0;
-    let dz = 0;
-
-
-    if (
-        keys["KeyW"]
-    ) {
-
-        dx +=
-            forward.x * speed;
-
-        dz +=
-            forward.z * speed;
-    }
-
-
-    if (
-        keys["KeyS"]
-    ) {
-
-        dx -=
-            forward.x * speed;
-
-        dz -=
-            forward.z * speed;
-    }
-
-
-    if (
-        keys["KeyA"]
-    ) {
-
-        dx -=
-            right.x * speed;
-
-        dz -=
-            right.z * speed;
-    }
-
-
-    if (
-        keys["KeyD"]
-    ) {
-
-        dx +=
-            right.x * speed;
-
-        dz +=
-            right.z * speed;
-    }
-
-
-    moveWithCollision(
-        camera,
-        dx,
-        dz,
-        PLAYER_RADIUS
-    );
-
-
-    camera.position.y =
-        1.7;
-}
-
-
-// ======================================================
-// HUD
-// ======================================================
+/* =====================================================
+   HUD
+===================================================== */
 
 function updateHUD() {
 
@@ -1763,9 +1498,9 @@ function updateHUD() {
 
 
     document.getElementById(
-        "botCount"
+        "bots"
     ).textContent =
-        bots.length;
+        enemies.length;
 
 
     document.getElementById(
@@ -1773,40 +1508,38 @@ function updateHUD() {
     ).textContent =
         ammo +
         " / " +
-        reserveAmmo;
+        reserve;
 }
 
 
-// ======================================================
-// СМЕРТЬ
-// ======================================================
+/* =====================================================
+   СМЕРТЬ
+===================================================== */
 
 function playerDeath() {
 
-    gameOver = true;
+    dead = true;
 
     document.exitPointerLock();
 
 
-    document.getElementById(
-        "dead"
-    ).style.display =
-        "flex";
-
-
-    document.getElementById(
-        "deathStats"
-    ).textContent =
+    alert(
+        "Вы погибли!\n\n" +
         "Убийств: " +
-        kills;
+        kills
+    );
+
+
+    location.reload();
 }
 
 
-// ======================================================
-// СОБЫТИЯ
-// ======================================================
+/* =====================================================
+   СОБЫТИЯ
+===================================================== */
 
-function addEvents() {
+function createEvents() {
+
 
     window.addEventListener(
         "resize",
@@ -1816,7 +1549,9 @@ function addEvents() {
                 innerWidth /
                 innerHeight;
 
+
             camera.updateProjectionMatrix();
+
 
             renderer.setSize(
                 innerWidth,
@@ -1828,13 +1563,13 @@ function addEvents() {
 
     document.addEventListener(
         "keydown",
-        e => {
+        event => {
 
-            keys[e.code] = true;
+            keys[event.code] = true;
 
 
             if (
-                e.code === "KeyR"
+                event.code === "KeyR"
             ) {
 
                 reload();
@@ -1845,16 +1580,16 @@ function addEvents() {
 
     document.addEventListener(
         "keyup",
-        e => {
+        event => {
 
-            keys[e.code] = false;
+            keys[event.code] = false;
         }
     );
 
 
     document.addEventListener(
         "mousemove",
-        e => {
+        event => {
 
             if (
                 document.pointerLockElement !==
@@ -1863,19 +1598,20 @@ function addEvents() {
 
 
             yaw -=
-                e.movementX *
+                event.movementX *
                 .002;
 
+
             pitch -=
-                e.movementY *
+                event.movementY *
                 .002;
 
 
             pitch =
                 Math.max(
-                    -1.45,
+                    -1.4,
                     Math.min(
-                        1.45,
+                        1.4,
                         pitch
                     )
                 );
@@ -1884,8 +1620,10 @@ function addEvents() {
             camera.rotation.order =
                 "YXZ";
 
+
             camera.rotation.y =
                 yaw;
+
 
             camera.rotation.x =
                 pitch;
@@ -1895,14 +1633,15 @@ function addEvents() {
 
     document.addEventListener(
         "mousedown",
-        e => {
+        event => {
 
             if (
-                e.button === 0
+                event.button === 0
             ) {
 
                 shoot();
             }
+
 
             if (
                 document.pointerLockElement !==
@@ -1916,9 +1655,9 @@ function addEvents() {
 }
 
 
-// ======================================================
-// GAME LOOP
-// ======================================================
+/* =====================================================
+   GAME LOOP
+===================================================== */
 
 function animate() {
 
@@ -1928,34 +1667,14 @@ function animate() {
 
 
     if (
-        !gameStarted ||
-        gameOver
-    ) {
-
-        return;
-    }
+        !started ||
+        dead
+    ) return;
 
 
-    const delta =
-        clock.getDelta();
+    updatePlayer();
 
-
-    updatePlayer(delta);
-
-
-    for (
-        const bot of [...bots]
-    ) {
-
-        updateBot(
-            bot,
-            delta
-        );
-    }
-
-
-    updateHUD();
-
+    updateBots();
 
     renderer.render(
         scene,
