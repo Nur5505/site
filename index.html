@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Не счетчик</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #0f1117;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .counter {
+            text-align: center;
+            padding: 40px;
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 30px;
+        }
+
+        #number {
+            font-size: 120px;
+            font-weight: bold;
+            margin-bottom: 40px;
+            transition: transform 0.15s ease;
+        }
+
+        #number.animate {
+            transform: scale(1.2);
+        }
+
+        .plus {
+            width: 180px;
+            height: 180px;
+            border: none;
+            border-radius: 50%;
+            background: #ffffff;
+            color: #0f1117;
+            font-size: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .plus:hover {
+            transform: scale(1.05);
+        }
+
+        .plus:active {
+            transform: scale(0.92);
+        }
+
+        .reset {
+            display: block;
+            margin: 30px auto 0;
+            padding: 12px 25px;
+            border: 1px solid #444;
+            border-radius: 10px;
+            background: transparent;
+            color: #aaa;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .reset:hover {
+            color: white;
+            border-color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="counter">
+        <h1>Не Счётчик</h1>
+
+        <div id="number">0</div>
+
+        <button class="plus" onclick="addOne()">+1</button>
+
+        <button class="reset" onclick="resetCounter()">
+            Сбросить
+        </button>
+    </div>
+
+a    <script>
+        let count = 0;
+
+        const number = document.getElementById("number");
+
+        function addOne() {
+            count++;
+            number.textContent = count;
+
+            number.classList.remove("animate");
+
+            void number.offsetWidth;
+
+            number.classList.add("animate");
+        }
+
+        function resetCounter() {
+            count = 0;
+            number.textContent = count;
+        }
+    </script>
+
+</body>
+</html>
