@@ -3,122 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Не счетчик</title>
+    <title>Змейка</title>
 
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
+            margin: 0;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #0f1117;
+            background: #0b0f19;
             color: white;
             font-family: Arial, sans-serif;
         }
 
-        .counter {
+        .game-container {
+            width: 500px;
+            max-width: 95vw;
             text-align: center;
-            padding: 40px;
         }
 
         h1 {
+            margin: 0 0 15px;
             font-size: 42px;
-            margin-bottom: 30px;
         }
 
-        #number {
-            font-size: 120px;
-            font-weight: bold;
-            margin-bottom: 40px;
-            transition: transform 0.15s ease;
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 20px;
         }
 
-        #number.animate {
-            transform: scale(1.2);
-        }
-
-        .plus {
-            width: 180px;
-            height: 180px;
-            border: none;
-            border-radius: 50%;
-            background: #ffffff;
-            color: #0f1117;
-            font-size: 60px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.15s;
-        }
-
-        .plus:hover {
-            transform: scale(1.05);
-        }
-
-        .plus:active {
-            transform: scale(0.92);
-        }
-
-        .reset {
-            display: block;
-            margin: 30px auto 0;
-            padding: 12px 25px;
-            border: 1px solid #444;
+        .score {
+            background: #151c2c;
+            padding: 10px 18px;
             border-radius: 10px;
-            background: transparent;
-            color: #aaa;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.2s;
         }
 
-        .reset:hover {
+        canvas {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #111827;
+            border: 3px solid #273449;
+            border-radius: 15px;
+            display: block;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: #22c55e;
             color: white;
-            border-color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #16a34a;
+        }
+
+        .controls {
+            margin-top: 15px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        .game-over {
+            margin-top: 10px;
+            font-size: 22px;
+            color: #ef4444;
+            font-weight: bold;
+            min-height: 27px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="counter">
-        <h1>Не Счётчик</h1>
+<div class="game-container">
 
-        <div id="number">0</div>
+    <h1>🐍 Змейка</h1>
 
-        <button class="plus" onclick="addOne()">+1</button>
-
-        <button class="reset" onclick="resetCounter()">
-            Сбросить
-        </button>
+    <div class="score-panel">
+        <div class="score">Счёт: <span id="score">0</span></div>
+        <div class="score">Рекорд: <span id="highScore">0</span></div>
     </div>
 
-a    <script>
-        let count = 0;
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
 
-        const number = document.getElementById("number");
+    <div id="gameOver" class="game-over"></div>
 
-        function addOne() {
-            count++;
-            number.textContent = count;
+    <button onclick="restartGame()">Начать заново</button>
 
-            number.classList.remove("animate");
+    <div class="controls">
+        Управление: стрелки ↑ ↓ ← → или W A S D
+    </div>
 
-            void number.offsetWidth;
+</div>
 
-            number.classList.add("animate");
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+
+    let snake;
+    let food;
+    let direction;
+    let nextDirection;
+    let score;
+    let gameRunning;
+
+    let highScore = localStorage.getItem("snakeHighScore") || 0;
+
+    document.getElementById("highScore").textContent = highScore;
+
+    function startGame() {
+        snake = [
+            { x: 10, y: 10 },
+            { x: 9, y: 10 },
+            { x: 8, y: 10 }
+        ];
+
+        direction = { x: 1, y: 0 };
+        nextDirection = { x: 1, y: 0 };
+
+        score = 0;
+        gameRunning = true;
+
+        document.getElementById("score").textContent = score;
+        document.getElementById("gameOver").textContent = "";
+
+        createFood();
+    }
+
+    function createFood() {
+        do {
+            food = {
+                x: Math.floor(Math.random() * tileCount),
+                y: Math.floor(Math.random() * tileCount)
+            };
+        } while (
+            snake.some(segment =>
+                segment.x === food.x && segment.y === food.y
+            )
+        );
+    }
+
+    function update() {
+        if (!gameRunning) return;
+
+        direction = nextDirection;
+
+        const head = {
+            x: snake[0].x + direction.x,
+            y: snake[0].y + direction.y
+        };
+
+        // Столкновение со стеной
+        if (
+            head.x < 0 ||
+            head.x >= tileCount ||
+            head.y < 0 ||
+            head.y >= tileCount
+        ) {
+            endGame();
+            return;
         }
 
-        function resetCounter() {
-            count = 0;
-            number.textContent = count;
+        // Столкновение с собой
+        if (
+            snake.some(segment =>
+                segment.x === head.x && segment.y === head.y
+            )
+        ) {
+            endGame();
+            return;
         }
-    </script>
+
+        snake.unshift(head);
+
+        // Съела еду
+        if (head.x === food.x && head.y === food.y) {
+            score++;
+
+            document.getElementById("score").textContent = score;
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem("snakeHighScore", highScore);
+                document.getElementById("highScore").textContent = highScore;
+            }
+
+            createFood();
+        } else {
+            snake.pop();
+        }
+
+        draw();
+    }
+
+    function draw() {
+        // Фон
+        ctx.fillStyle = "#111827";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Сетка
+        ctx.strokeStyle = "#182235";
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i <= canvas.width; i += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, canvas.height);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(canvas.width, i);
+            ctx.stroke();
+        }
+
+        // Еда
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.arc(
+            food.x * gridSize + gridSize / 2,
+            food.y * gridSize + gridSize / 2,
+            gridSize / 2 - 3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+
+        // Змейка
+        snake.forEach((segment, index) => {
+
+            if (index === 0) {
+                ctx.fillStyle = "#4ade80";
+            } else {
+                ctx.fillStyle = "#22c55e";
+            }
+
+            ctx.fillRect(
+                segment.x * gridSize + 2,
+                segment.y * gridSize + 2,
+                gridSize - 4,
+                gridSize - 4
+            );
+        });
+    }
+
+    function endGame() {
+        gameRunning = false;
+
+        document.getElementById("gameOver").textContent =
+            "Игра окончена! 😵";
+    }
+
+    function restartGame() {
+        startGame();
+        draw();
+    }
+
+    document.addEventListener("keydown", event => {
+
+        const key = event.key.toLowerCase();
+
+        if ((key === "arrowup" || key === "w") && direction.y !== 1) {
+            nextDirection = { x: 0, y: -1 };
+        }
+
+        if ((key === "arrowdown" || key === "s") && direction.y !== -1) {
+            nextDirection = { x: 0, y: 1 };
+        }
+
+        if ((key === "arrowleft" || key === "a") && direction.x !== 1) {
+            nextDirection = { x: -1, y: 0 };
+        }
+
+        if ((key === "arrowright" || key === "d") && direction.x !== -1) {
+            nextDirection = { x: 1, y: 0 };
+        }
+    });
+
+    startGame();
+    draw();
+
+    setInterval(update, 100);
+</script>
 
 </body>
 </html>
