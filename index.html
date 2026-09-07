@@ -28,8 +28,30 @@
         }
 
         h1 {
-            margin: 0 0 15px;
+            margin: 0 0 20px;
             font-size: 42px;
+        }
+
+        .menu {
+            background: #151c2c;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .menu h2 {
+            margin-top: 0;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #273449;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
         }
 
         .score-panel {
@@ -56,12 +78,12 @@
 
         button {
             margin-top: 15px;
-            padding: 12px 25px;
+            padding: 13px 30px;
             border: none;
             border-radius: 10px;
             background: #22c55e;
             color: white;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -70,10 +92,12 @@
             background: #16a34a;
         }
 
-        .controls {
-            margin-top: 15px;
-            color: #9ca3af;
-            font-size: 14px;
+        .restart {
+            background: #3b82f6;
+        }
+
+        .restart:hover {
+            background: #2563eb;
         }
 
         .game-over {
@@ -82,6 +106,16 @@
             color: #ef4444;
             font-weight: bold;
             min-height: 27px;
+        }
+
+        .controls {
+            margin-top: 15px;
+            color: #9ca3af;
+            font-size: 14px;
+        }
+
+        #gameArea {
+            display: none;
         }
     </style>
 </head>
@@ -92,42 +126,101 @@
 
     <h1>🐍 Змейка</h1>
 
-    <div class="score-panel">
-        <div class="score">Счёт: <span id="score">0</span></div>
-        <div class="score">Рекорд: <span id="highScore">0</span></div>
+    <!-- Главное меню -->
+    <div id="menu" class="menu">
+
+        <h2>Настройка игры</h2>
+
+        <label for="speed">Выберите скорость:</label>
+
+        <select id="speed">
+            <option value="180">🐢 Медленная</option>
+            <option value="120" selected>🚶 Нормальная</option>
+            <option value="80">🏃 Быстрая</option>
+            <option value="50">⚡ Очень быстрая</option>
+        </select>
+
+        <br>
+
+        <button onclick="startGame()">СТАРТ</button>
+
     </div>
 
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
 
-    <div id="gameOver" class="game-over"></div>
+    <!-- Игра -->
+    <div id="gameArea">
 
-    <button onclick="restartGame()">Начать заново</button>
+        <div class="score-panel">
+            <div class="score">
+                Счёт: <span id="score">0</span>
+            </div>
 
-    <div class="controls">
-        Управление: стрелки ↑ ↓ ← → или W A S D
+            <div class="score">
+                Рекорд: <span id="highScore">0</span>
+            </div>
+        </div>
+
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+        <div id="gameOver" class="game-over"></div>
+
+        <button class="restart" onclick="restartGame()">
+            Играть заново
+        </button>
+
+        <div class="controls">
+            Управление: стрелки ↑ ↓ ← → или W A S D
+        </div>
+
     </div>
 
 </div>
 
+
 <script>
+
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
     const gridSize = 20;
     const tileCount = canvas.width / gridSize;
 
-    let snake;
-    let food;
-    let direction;
-    let nextDirection;
-    let score;
-    let gameRunning;
+    let snake = [];
+    let food = {};
 
+    let direction = { x: 1, y: 0 };
+    let nextDirection = { x: 1, y: 0 };
+
+    let score = 0;
     let highScore = localStorage.getItem("snakeHighScore") || 0;
+
+    let gameRunning = false;
+    let gameSpeed = 120;
+    let gameTimer;
+
 
     document.getElementById("highScore").textContent = highScore;
 
+
+    // Запуск игры
     function startGame() {
+
+        gameSpeed = Number(
+            document.getElementById("speed").value
+        );
+
+        document.getElementById("menu").style.display = "none";
+        document.getElementById("gameArea").style.display = "block";
+
+        restartGame();
+    }
+
+
+    // Создание новой игры
+    function restartGame() {
+
+        clearInterval(gameTimer);
+
         snake = [
             { x: 10, y: 10 },
             { x: 9, y: 10 },
@@ -144,22 +237,35 @@
         document.getElementById("gameOver").textContent = "";
 
         createFood();
+        draw();
+
+        gameTimer = setInterval(update, gameSpeed);
     }
 
+
+    // Создание еды
     function createFood() {
+
         do {
+
             food = {
                 x: Math.floor(Math.random() * tileCount),
                 y: Math.floor(Math.random() * tileCount)
             };
+
         } while (
-            snake.some(segment =>
-                segment.x === food.x && segment.y === food.y
+            snake.some(
+                segment =>
+                    segment.x === food.x &&
+                    segment.y === food.y
             )
         );
     }
 
+
+    // Обновление игры
     function update() {
+
         if (!gameRunning) return;
 
         direction = nextDirection;
@@ -169,6 +275,7 @@
             y: snake[0].y + direction.y
         };
 
+
         // Столкновение со стеной
         if (
             head.x < 0 ||
@@ -176,52 +283,90 @@
             head.y < 0 ||
             head.y >= tileCount
         ) {
+
             endGame();
             return;
         }
+
 
         // Столкновение с собой
         if (
-            snake.some(segment =>
-                segment.x === head.x && segment.y === head.y
+            snake.some(
+                segment =>
+                    segment.x === head.x &&
+                    segment.y === head.y
             )
         ) {
+
             endGame();
             return;
         }
 
+
         snake.unshift(head);
 
-        // Съела еду
-        if (head.x === food.x && head.y === food.y) {
+
+        // Если съела еду
+        if (
+            head.x === food.x &&
+            head.y === food.y
+        ) {
+
             score++;
 
             document.getElementById("score").textContent = score;
 
+
+            // Новый рекорд
             if (score > highScore) {
+
                 highScore = score;
-                localStorage.setItem("snakeHighScore", highScore);
-                document.getElementById("highScore").textContent = highScore;
+
+                localStorage.setItem(
+                    "snakeHighScore",
+                    highScore
+                );
+
+                document.getElementById(
+                    "highScore"
+                ).textContent = highScore;
             }
 
             createFood();
+
         } else {
+
             snake.pop();
         }
 
         draw();
     }
 
+
+    // Рисование
     function draw() {
+
         // Фон
         ctx.fillStyle = "#111827";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillRect(
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        );
+
 
         // Сетка
         ctx.strokeStyle = "#182235";
         ctx.lineWidth = 1;
 
-        for (let i = 0; i <= canvas.width; i += gridSize) {
+        for (
+            let i = 0;
+            i <= canvas.width;
+            i += gridSize
+        ) {
+
             ctx.beginPath();
             ctx.moveTo(i, 0);
             ctx.lineTo(i, canvas.height);
@@ -233,9 +378,12 @@
             ctx.stroke();
         }
 
+
         // Еда
         ctx.fillStyle = "#ef4444";
+
         ctx.beginPath();
+
         ctx.arc(
             food.x * gridSize + gridSize / 2,
             food.y * gridSize + gridSize / 2,
@@ -243,63 +391,103 @@
             0,
             Math.PI * 2
         );
+
         ctx.fill();
 
+
         // Змейка
-        snake.forEach((segment, index) => {
+        snake.forEach(
+            (segment, index) => {
 
-            if (index === 0) {
-                ctx.fillStyle = "#4ade80";
-            } else {
-                ctx.fillStyle = "#22c55e";
+                if (index === 0) {
+                    ctx.fillStyle = "#4ade80";
+                } else {
+                    ctx.fillStyle = "#22c55e";
+                }
+
+                ctx.fillRect(
+                    segment.x * gridSize + 2,
+                    segment.y * gridSize + 2,
+                    gridSize - 4,
+                    gridSize - 4
+                );
             }
-
-            ctx.fillRect(
-                segment.x * gridSize + 2,
-                segment.y * gridSize + 2,
-                gridSize - 4,
-                gridSize - 4
-            );
-        });
+        );
     }
 
+
+    // Конец игры
     function endGame() {
+
         gameRunning = false;
 
-        document.getElementById("gameOver").textContent =
+        clearInterval(gameTimer);
+
+        document.getElementById(
+            "gameOver"
+        ).textContent =
             "Игра окончена! 😵";
     }
 
-    function restartGame() {
-        startGame();
-        draw();
-    }
 
-    document.addEventListener("keydown", event => {
+    // Управление
+    document.addEventListener(
+        "keydown",
+        event => {
 
-        const key = event.key.toLowerCase();
+            const key = event.key.toLowerCase();
 
-        if ((key === "arrowup" || key === "w") && direction.y !== 1) {
-            nextDirection = { x: 0, y: -1 };
+
+            if (
+                (key === "arrowup" || key === "w") &&
+                direction.y !== 1
+            ) {
+
+                nextDirection = {
+                    x: 0,
+                    y: -1
+                };
+            }
+
+
+            if (
+                (key === "arrowdown" || key === "s") &&
+                direction.y !== -1
+            ) {
+
+                nextDirection = {
+                    x: 0,
+                    y: 1
+                };
+            }
+
+
+            if (
+                (key === "arrowleft" || key === "a") &&
+                direction.x !== 1
+            ) {
+
+                nextDirection = {
+                    x: -1,
+                    y: 0
+                };
+            }
+
+
+            if (
+                (key === "arrowright" || key === "d") &&
+                direction.x !== -1
+            ) {
+
+                nextDirection = {
+                    x: 1,
+                    y: 0
+                };
+            }
+
         }
+    );
 
-        if ((key === "arrowdown" || key === "s") && direction.y !== -1) {
-            nextDirection = { x: 0, y: 1 };
-        }
-
-        if ((key === "arrowleft" || key === "a") && direction.x !== 1) {
-            nextDirection = { x: -1, y: 0 };
-        }
-
-        if ((key === "arrowright" || key === "d") && direction.x !== -1) {
-            nextDirection = { x: 1, y: 0 };
-        }
-    });
-
-    startGame();
-    draw();
-
-    setInterval(update, 100);
 </script>
 
 </body>
