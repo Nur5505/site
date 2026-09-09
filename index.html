@@ -102,7 +102,7 @@ button.active{background:linear-gradient(135deg,rgba(124,92,255,.38),rgba(34,211
     <div class="countdown"><div id="countdown">00:00</div><div class="count-label" id="countLabel">до события</div></div>
   </div>
   <div class="next-card glass">
-    <div class="next-label">Следующая пара</div>
+    <div class="next-label" id="nextLabel">Следующая пара</div>
     <div id="nextName">—</div>
     <div class="small" id="nextTime">—</div>
     <div class="meta"><span id="nextRoom">Кабинет: —</span><span id="nextPeriod">Пара: —</span></div>
@@ -128,7 +128,12 @@ button.active{background:linear-gradient(135deg,rgba(124,92,255,.38),rgba(34,211
   <div class="panel-head"><h2 id="scheduleTitle">Расписание на сегодня</h2><div class="small">Python отменён и удалён</div></div>
   <div class="lessons" id="lessons"></div>
 </section>
-<div class="footer">Старт учебного года: 31.08.2026 • Время сайта: Asia/Shanghai • обновление каждую секунду</div>
+<div class="footer">
+Старт учебного года: 31.08.2026 • Время сайта: Asia/Shanghai • обновление каждую секунду<br>
+Звонки: 1 — 09:30–10:15 · 2 — 10:20–11:05 · 3 — 11:25–12:10 · 4 — 12:15–13:00 ·
+5 — 13:05–13:50 · 6 — 16:00–16:45 · 7 — 16:50–17:35 · 8 — 17:55–18:40 ·
+9 — 18:45–19:30 · 10 — 20:30–21:15 · 11 — 21:20–22:05 · 12 — 22:10–22:55
+</div>
 </div>
 
 <script>
@@ -175,12 +180,20 @@ const S={
 };
 
 let faculty="software";
-let selectedDay=null;
+let selectedDay=dayIndex(chinaNow());
 
 function chinaNow(){
-  const s=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Shanghai",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date());
-  const [d,t]=s.split(", ");
-  return new Date(d+"T"+t+"+08:00");
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone:"Asia/Shanghai",
+    year:"numeric", month:"2-digit", day:"2-digit",
+    hour:"2-digit", minute:"2-digit", second:"2-digit",
+    hour12:false
+  }).formatToParts(new Date());
+
+  const get = type => parts.find(p => p.type === type)?.value;
+  return new Date(
+    `${get("year")}-${get("month")}-${get("day")}T${get("hour")}:${get("minute")}:${get("second")}+08:00`
+  );
 }
 function fmtDate(d){
  return new Intl.DateTimeFormat("ru-RU",{timeZone:"Asia/Shanghai",day:"numeric",month:"long",year:"numeric"}).format(d);
@@ -202,12 +215,21 @@ function secToStr(sec){
  return h ? `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}` : `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 function renderDays(day){
- const el=document.getElementById("days"); el.innerHTML="";
+ const el=document.getElementById("days");
+ el.innerHTML="";
+ const now=chinaNow();
+ const today=dayIndex(now);
+
  DAYN.forEach((n,i)=>{
-  const b=document.createElement("button"); b.className="day-btn"+(i===day?" selected":"");
-  if(i===day)b.classList.add("today");
-  b.innerHTML=`<strong>${n}</strong>${i===day?"Сегодня":" "}`;
-  b.onclick=()=>{selectedDay=i; renderSchedule(i); renderDays(i);};
+  const b=document.createElement("button");
+  b.className="day-btn"+(i===day?" selected":"")+(i===today?" today":"");
+  b.innerHTML=`<strong>${n}</strong>${i===today?"Сегодня":""}`;
+  b.onclick=()=>{
+    selectedDay=i;
+    renderSchedule(i);
+    renderDays(i);
+    tick();
+  };
   el.appendChild(b);
  });
 }
@@ -244,16 +266,22 @@ function tick(){
  document.getElementById("infoDay").textContent=DAYFULL[day];
  document.getElementById("infoWeek").textContent=w?`${w}-я неделя`:"До начала";
  document.getElementById("weekText").textContent=w?`${w}-я неделя обучения`:"До начала обучения";
- if(selectedDay===null){selectedDay=day;renderDays(day);renderSchedule(day)}
+ if(document.getElementById("days").children.length===0){
+  renderDays(selectedDay);
+  renderSchedule(selectedDay);
+}
  if(selectedDay===day){
    const st=currentState(now,day);
    const title=document.getElementById("statusTitle"), text=document.getElementById("statusText"), cd=document.getElementById("countdown"), label=document.getElementById("countLabel");
-   document.querySelectorAll(".lesson").forEach(x=>x.classList.remove("now","past"));
+   document.querySelectorAll(".lesson").forEach((x)=>{
+  x.classList.remove("now","past");
+});
    if(st.type==="lesson"){
      title.textContent="Сейчас идёт пара";
      text.innerHTML=`<b>${st.lesson.ru}</b> · ${st.lesson.cn} · кабинет ${st.lesson.room}`;
      cd.textContent=secToStr(st.remain); label.textContent="до конца пары";
      const node=document.querySelector(`.lesson[data-key="${st.lesson.key}"]`); if(node)node.classList.add("now");
+     document.getElementById("nextLabel").textContent="Текущая пара";
      document.getElementById("nextName").textContent=st.lesson.ru;
      document.getElementById("nextTime").textContent=`Сейчас · ${st.lesson.times[0]}–${st.lesson.times[1]}`;
      document.getElementById("nextRoom").textContent=`📍 ${st.lesson.room}`;
@@ -262,6 +290,7 @@ function tick(){
      title.textContent="Перерыв";
      text.innerHTML=`До следующей пары: <b>${st.next.ru}</b>`;
      cd.textContent=secToStr(st.remain); label.textContent="до звонка";
+     document.getElementById("nextLabel").textContent="Следующая пара";
      document.getElementById("nextName").textContent=st.next.ru;
      document.getElementById("nextTime").textContent=`${st.next.times[0]}–${st.next.times[1]}`;
      document.getElementById("nextRoom").textContent=`📍 ${st.next.room}`;
@@ -270,6 +299,7 @@ function tick(){
      title.textContent="Занятия на сегодня закончились";
      text.textContent="Можно отдыхать — новых пар по выбранному расписанию нет.";
      cd.textContent="00:00"; label.textContent="до конца учебного дня";
+     document.getElementById("nextLabel").textContent="Расписание";
      document.getElementById("nextName").textContent="Нет пар";
      document.getElementById("nextTime").textContent="Сегодня занятий больше нет";
      document.getElementById("nextRoom").textContent="Кабинет: —";
